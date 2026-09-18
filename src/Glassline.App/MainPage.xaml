@@ -5,17 +5,130 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Loaded="OnLoaded"
+    Unloaded="OnUnloaded"
     mc:Ignorable="d">
 
-    <Grid Background="Transparent">
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="IslandBackgroundBrush" Color="#F20B0D12" />
+                    <SolidColorBrush x:Key="ArtworkBackgroundBrush" Color="#FF252A34" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="IslandBackgroundBrush" Color="#F20B0D12" />
+                    <SolidColorBrush x:Key="ArtworkBackgroundBrush" Color="#FF252A34" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="IslandBackgroundBrush" Color="#F2F7F7FA" />
+                    <SolidColorBrush x:Key="ArtworkBackgroundBrush" Color="#FFE2E5EB" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Invoked="OnEscapeInvoked" Key="Escape" />
+        <KeyboardAccelerator
+            Invoked="OnToggleExpansionInvoked"
+            Key="Space"
+            Modifiers="Control" />
+    </Page.KeyboardAccelerators>
+
+    <Grid
+        x:Name="InteractionRoot"
+        Background="Transparent">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="ExpansionStates">
+                <VisualState x:Name="CompactState">
+                    <VisualState.Setters>
+                        <Setter Target="IslandSurface.CornerRadius" Value="26" />
+                        <Setter Target="IslandSurface.Padding" Value="16,8" />
+                        <Setter Target="CompactContent.Opacity" Value="1" />
+                        <Setter Target="CompactContent.IsHitTestVisible" Value="True" />
+                        <Setter Target="ExpandedContent.Opacity" Value="0" />
+                        <Setter Target="ExpandedContent.IsHitTestVisible" Value="False" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="ExpandedState">
+                    <VisualState.Setters>
+                        <Setter Target="IslandSurface.CornerRadius" Value="24" />
+                        <Setter Target="IslandSurface.Padding" Value="18,14" />
+                        <Setter Target="CompactContent.Opacity" Value="0" />
+                        <Setter Target="CompactContent.IsHitTestVisible" Value="False" />
+                        <Setter Target="ExpandedContent.Opacity" Value="1" />
+                        <Setter Target="ExpandedContent.IsHitTestVisible" Value="True" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualStateGroup.Transitions>
+                    <VisualTransition GeneratedDuration="0:0:0.16">
+                        <VisualTransition.GeneratedEasingFunction>
+                            <CubicEase EasingMode="EaseOut" />
+                        </VisualTransition.GeneratedEasingFunction>
+                    </VisualTransition>
+                </VisualStateGroup.Transitions>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <Border
+            x:Name="IslandSurface"
             Margin="6"
-            Padding="16,10"
-            Background="#F20B0D12"
-            CornerRadius="28"
+            Padding="16,8"
+            Background="{ThemeResource IslandBackgroundBrush}"
+            CornerRadius="26"
             PointerEntered="OnPointerEntered"
             PointerExited="OnPointerExited"
             Tapped="OnSurfaceTapped">
+            <Border.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutSubItem Text="Posição">
+                        <ToggleMenuFlyoutItem
+                            x:Name="TopLeftPlacementItem"
+                            Click="OnPlacementClick"
+                            Tag="TopLeft"
+                            Text="Superior esquerda" />
+                        <ToggleMenuFlyoutItem
+                            x:Name="TopCenterPlacementItem"
+                            Click="OnPlacementClick"
+                            Tag="TopCenter"
+                            Text="Superior centro" />
+                        <ToggleMenuFlyoutItem
+                            x:Name="TopRightPlacementItem"
+                            Click="OnPlacementClick"
+                            Tag="TopRight"
+                            Text="Superior direita" />
+                    </MenuFlyoutSubItem>
+                    <MenuFlyoutSubItem Text="Aparência">
+                        <ToggleMenuFlyoutItem
+                            x:Name="SystemAppearanceItem"
+                            Click="OnAppearanceClick"
+                            Tag="System"
+                            Text="Usar tema do sistema" />
+                        <ToggleMenuFlyoutItem
+                            x:Name="LightAppearanceItem"
+                            Click="OnAppearanceClick"
+                            Tag="Light"
+                            Text="Claro" />
+                        <ToggleMenuFlyoutItem
+                            x:Name="DarkAppearanceItem"
+                            Click="OnAppearanceClick"
+                            Tag="Dark"
+                            Text="Escuro" />
+                    </MenuFlyoutSubItem>
+                    <ToggleMenuFlyoutItem
+                        x:Name="HideInFullscreenItem"
+                        Click="OnHideInFullscreenClick"
+                        Text="Ocultar em tela cheia" />
+                    <ToggleMenuFlyoutItem
+                        x:Name="StartWithWindowsItem"
+                        Click="OnStartWithWindowsClick"
+                        Text="Iniciar com o Windows" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Click="OnExitClick" Icon="Cancel" Text="Sair do Glassline" />
+                </MenuFlyout>
+            </Border.ContextFlyout>
+
             <Grid>
                 <Grid x:Name="CompactContent">
                     <Grid.ColumnDefinitions>
@@ -24,17 +137,32 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Width="36" Height="36" Background="#FF252A34" CornerRadius="9">
-                        <FontIcon Glyph="&#xE8D6;" FontSize="16" />
+                    <Border Width="36" Height="36" Background="{ThemeResource ArtworkBackgroundBrush}" CornerRadius="9">
+                        <Grid>
+                            <Image
+                                x:Name="CompactArtwork"
+                                ImageFailed="OnArtworkFailed"
+                                Stretch="UniformToFill"
+                                Visibility="Collapsed" />
+                            <FontIcon x:Name="CompactArtworkFallback" Glyph="&#xE8D6;" FontSize="16" />
+                        </Grid>
                     </Border>
                     <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center" Spacing="1">
-                        <TextBlock FontWeight="SemiBold" Text="Glassline" />
-                        <TextBlock FontSize="11" Foreground="#FF9CA3AF" Text="Nenhuma mídia ativa" />
+                        <TextBlock
+                            x:Name="CompactTitle"
+                            AutomationProperties.LiveSetting="Polite"
+                            FontWeight="SemiBold"
+                            Text="Glassline"
+                            TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="CompactArtist" FontSize="11" Foreground="#FF9CA3AF" Text="Nenhuma mídia ativa" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
-                    <FontIcon Grid.Column="2" Glyph="&#xE768;" FontSize="16" />
+                    <FontIcon x:Name="CompactPlaybackIcon" Grid.Column="2" Glyph="&#xE768;" FontSize="16" />
                 </Grid>
 
-                <Grid x:Name="ExpandedContent" Visibility="Collapsed">
+                <Grid
+                    x:Name="ExpandedContent"
+                    IsHitTestVisible="False"
+                    Opacity="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -42,25 +170,56 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Border Width="64" Height="64" Background="#FF252A34" CornerRadius="14">
-                            <FontIcon Glyph="&#xE8D6;" FontSize="24" />
+                        <Border Width="64" Height="64" Background="{ThemeResource ArtworkBackgroundBrush}" CornerRadius="14">
+                            <Grid>
+                                <Image
+                                    x:Name="ExpandedArtwork"
+                                    ImageFailed="OnArtworkFailed"
+                                    Stretch="UniformToFill"
+                                    Visibility="Collapsed" />
+                                <FontIcon x:Name="ExpandedArtworkFallback" Glyph="&#xE8D6;" FontSize="24" />
+                            </Grid>
                         </Border>
                         <StackPanel VerticalAlignment="Center" Spacing="3">
-                            <TextBlock FontSize="17" FontWeight="SemiBold" Text="Glassline" />
-                            <TextBlock Foreground="#FF9CA3AF" Text="Aguardando uma sessão de mídia" />
+                            <TextBlock x:Name="ExpandedTitle" FontSize="17" FontWeight="SemiBold" Text="Glassline" TextTrimming="CharacterEllipsis" />
+                            <TextBlock x:Name="ExpandedArtist" Foreground="#FF9CA3AF" Text="Aguardando uma sessão de mídia" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </StackPanel>
 
-                    <ProgressBar Grid.Row="1" Margin="0,14,0,8" Maximum="100" Value="0" />
+                    <ProgressBar
+                        x:Name="PlaybackProgress"
+                        Grid.Row="1"
+                        AutomationProperties.Name="Progresso da reprodução"
+                        Margin="0,14,0,8"
+                        Maximum="1"
+                        Value="0" />
 
                     <StackPanel Grid.Row="2" HorizontalAlignment="Center" Orientation="Horizontal" Spacing="22">
-                        <Button AutomationProperties.Name="Anterior" Background="Transparent">
+                        <Button
+                            x:Name="PreviousButton"
+                            AutomationProperties.Name="Anterior"
+                            Background="Transparent"
+                            Click="OnPreviousClick"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="Faixa anterior">
                             <FontIcon Glyph="&#xE892;" />
                         </Button>
-                        <Button AutomationProperties.Name="Reproduzir ou pausar" Background="Transparent">
-                            <FontIcon Glyph="&#xE768;" />
+                        <Button
+                            x:Name="TogglePlaybackButton"
+                            AutomationProperties.Name="Reproduzir ou pausar"
+                            Background="Transparent"
+                            Click="OnTogglePlaybackClick"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="Reproduzir ou pausar">
+                            <FontIcon x:Name="ExpandedPlaybackIcon" Glyph="&#xE768;" />
                         </Button>
-                        <Button AutomationProperties.Name="Próxima" Background="Transparent">
+                        <Button
+                            x:Name="NextButton"
+                            AutomationProperties.Name="Próxima"
+                            Background="Transparent"
+                            Click="OnNextClick"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="Próxima faixa">
                             <FontIcon Glyph="&#xE893;" />
                         </Button>
                     </StackPanel>

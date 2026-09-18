@@ -6,9 +6,9 @@ deve alterar a reprodução de áudio nem o comportamento da TUI do Noctune.
 ## Transporte
 
 - Named pipe local do Windows.
-- Nome inicial: `LOCAL\\glassline-noctune-v1` quando os dois aplicativos forem
-  empacotados; o nome final incluirá o identificador do usuário para instalações
-  não empacotadas.
+- Nome: `glassline-noctune-v1-{USER_HASH}`, em que `USER_HASH` são os primeiros
+  16 caracteres hexadecimais maiúsculos do SHA-256 de `DOMAIN\\usuário`,
+  obtido das variáveis de ambiente `USERDOMAIN` e `USERNAME`.
 - Mensagens UTF-8 com prefixo de tamanho de 32 bits, little-endian.
 - Máximo de 1 MiB por mensagem.
 - O servidor rejeita versões de protocolo desconhecidas e mensagens inválidas.
@@ -62,10 +62,18 @@ em alta frequência ao Noctune.
 ```
 
 Comandos iniciais: `previous`, `toggle_playback`, `next`, `show_noctune`.
-Noctune confirma o resultado com `command_result` e envia o novo estado.
+Noctune confirma o resultado com `command_result` e envia o novo estado:
+
+```json
+{ "version": 1, "type": "command_result", "payload": { "id": "uuid", "success": true, "error": null } }
+```
+
+Glassline correlaciona a confirmação pelo `id` e abandona o comando se a
+conexão fechar ou se não houver resposta em dois segundos.
 
 ## Segurança
 
-O pipe é local e deve aceitar somente o usuário atual. Glassline não executa
+O servidor cria o pipe com a opção `CurrentUserOnly`; o pipe é local e deve
+aceitar somente o usuário atual. Glassline não executa
 comandos arbitrários, nem recebe caminhos ou URIs para abrir por meio deste
 protocolo.

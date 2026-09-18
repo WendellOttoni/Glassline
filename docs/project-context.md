@@ -150,6 +150,14 @@ Noctune nem no protocolo.
 
 ## Estado do repositório
 
-O repositório foi clonado vazio em `C:\Repo\Glassline`. Neste momento ele
-contém documentação de produto, arquitetura e protocolo; ainda não há projeto
-C#, dependências ou código de produção.
+O repositório contém uma solução .NET 10 com projetos separados para Core,
+Infrastructure e o aplicativo WinUI 3. O protótipo da cápsula já implementa
+expansão, janela sempre no topo, instância única, mídia normalizada, provider
+SMTC, servidor named pipe Noctune v1, seleção preferencial de provider, capas,
+progresso interpolado e ocultação orientada a eventos em tela cheia.
+
+Preferências de posição, aparência, ocultação em tela cheia e inicialização
+com o Windows são persistidas localmente. O cliente do pipe também está
+implementado no repositório Noctune como worker opcional e não bloqueante.
+Ainda falta definir a política de limpeza do cache de capas e validar
+interoperabilidade e consumo de recursos em build Release.
