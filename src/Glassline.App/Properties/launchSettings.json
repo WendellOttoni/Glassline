@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Glassline.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Glassline.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

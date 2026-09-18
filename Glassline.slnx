@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Glassline.App/Glassline.App.csproj" />
+    <Project Path="src/Glassline.Core/Glassline.Core.csproj" />
+    <Project Path="src/Glassline.Infrastructure/Glassline.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Glassline.Core.Tests/Glassline.Core.Tests.csproj" />
+  </Folder>
+</Solution>
